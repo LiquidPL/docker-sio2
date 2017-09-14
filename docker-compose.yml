@@ -1,0 +1,67 @@
+version: "3"
+
+services:
+  oioioi:
+    image: liquidpl/oioioi
+    container_name: sio2-oioioi
+    volumes:
+      - media:/sio2/deployment/media
+      - static:/sio2/deployment/static
+      - ./settings.py:/sio2/deployment/settings.py
+    env_file:
+      - .env
+      - .oioioi.env
+    environment:
+      - VIRTUAL_PROTO=uwsgi
+      - VIRTUAL_PORT=9000
+    depends_on:
+      - postgres
+      - rabbitmq
+  nginx:
+    image: nginx:alpine
+    container_name: sio2-nginx
+    volumes:
+      - static:/static
+      - ./logs:/var/log/nginx
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./docker-gen/vhost.d:/etc/nginx/vhost.d
+      - nginx-conf:/etc/nginx/conf.d
+      - nginx-html:/usr/share/nginx/html
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - oioioi
+  docker-gen:
+    image: jwilder/docker-gen
+    container_name: sio2-docker-gen
+    volumes:
+      - ./docker-gen/templates:/etc/docker-gen/templates
+      - ./docker-gen/vhost.d:/etc/nginx/vhost.d
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - nginx-conf:/etc/nginx/conf.d
+      - nginx-html:/usr/share/nginx/html
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.docker_gen=true"
+    command: -notify-sighup sio2-nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+  postgres:
+    image: postgres:latest
+    container_name: sio2-postgres
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./postgres/init-user.sh:/docker-entrypoint-initdb.d/init-user.sh
+    env_file:
+      - .env
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: sio2-rabbitmq
+
+volumes:
+  database:
+  media:
+  static:
+  nginx-conf:
+  nginx-html:

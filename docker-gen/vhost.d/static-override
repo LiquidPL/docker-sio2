@@ -1,0 +1,4 @@
+location /static/ {
+    alias /static/;
+    expires 1d;
+}

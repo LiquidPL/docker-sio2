@@ -1,0 +1,12 @@
+.env
+.oioioi.env
+
+settings.py
+
+docker-compose.override.yml
+
+logs/*
+nginx/certs/*
+
+docker-gen/vhost.d/*
+!docker-gen/vhost.d/static-override
