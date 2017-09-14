@@ -7,7 +7,6 @@ services:
     volumes:
       - media:/sio2/deployment/media
       - static:/sio2/deployment/static
-      - ./settings.py:/sio2/deployment/settings.py
     env_file:
       - .env
       - .oioioi.env
