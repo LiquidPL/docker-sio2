@@ -27,6 +27,7 @@ services:
       - ./docker-gen/vhost.d:/etc/nginx/vhost.d
       - nginx-conf:/etc/nginx/conf.d
       - nginx-html:/usr/share/nginx/html
+      - nginx-dhparam:/etc/nginx/dhparam
     labels:
       - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
     ports:
@@ -62,6 +63,21 @@ services:
     image: rabbitmq:latest
     container_name: sio2-rabbitmq
     restart: always
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: sio2-letsencrypt
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs
+      - ./docker-gen/vhost.d:/etc/nginx/vhost.d
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx-html:/usr/share/nginx/html
+    environment:
+      - "DEFAULT_EMAIL=${LETSENCRYPT_EMAIL}"
+      - "NGINX_DOCKER_GEN_CONTAINER=sio2-docker-gen"
+      - "NGINX_PROXY_CONTAINER=sio2-nginx"
+    restart: on-failure
+    depends_on:
+      - docker-gen
 
 volumes:
   database:
@@ -69,3 +85,4 @@ volumes:
   static:
   nginx-conf:
   nginx-html:
+  nginx-dhparam:
