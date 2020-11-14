@@ -7,6 +7,9 @@ services:
     volumes:
       - media:/sio2/deployment/media
       - static:/sio2/deployment/static
+    ports:
+      - "127.0.0.1:7888:7888"
+      - "127.0.0.1:9999:9999"
     env_file:
       - .env
       - .oioioi.env
