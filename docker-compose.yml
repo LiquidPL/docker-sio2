@@ -54,7 +54,7 @@ services:
     command: -notify-sighup sio2-nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
     restart: always
   postgres:
-    image: postgres:latest
+    image: postgres:15
     container_name: sio2-postgres
     volumes:
       - database:/var/lib/postgresql/data
